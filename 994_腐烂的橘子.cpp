@@ -3,6 +3,7 @@
 #include <queue>
 using namespace std;
 
+/*
 class Solution {
 public:
     vector<int>di={-1,1,0,0};
@@ -91,8 +92,84 @@ public:
         return ans;
     }
 };
+*/
 
+class Solution {
+public:
+    vector<int>di={-1,1,0,0};
+    vector<int>dj={0,0,-1,1};
 
+struct Location{
+    int row;
+    int col;
+};
+
+int BFS(vector<vector<bool>> &isVisited,vector<vector<int>>& grid,vector<Location>badOrange){
+    queue<Location> q;
+    for(int i=0;i<badOrange.size();++i){
+    Location origin;
+    origin.row=badOrange[i].row,origin.col=badOrange[i].col;
+    q.push(origin);   
+    }
+    int count=0;
+    while(!q.empty()){
+        int size=q.size();
+        bool addPoint=false;
+        //将这一轮遍历到的点提出来，并将下一轮的点加入
+        for(int k=0;k<size;++k){
+            Location tmp=q.front();
+            q.pop();
+            //入点
+            for(int h=0;h<4;++h){
+                //前提：满足边界条件
+                //如果周围四个点：被访问过则不加入到队列当中
+                int row=tmp.row+di[h],col=tmp.col+dj[h];
+                if((row>=0&&row<grid.size())&&(col>=0&&col<grid[0].size())){
+                    if(grid[row][col]==1&&!isVisited[row][col]){
+                        Location next;
+                        next.row=row;
+                        next.col=col;
+                        q.push(next);
+                        isVisited[row][col]=true;
+                        addPoint=true;
+                    }
+                }
+            }
+        } 
+        //如果加入了点，一轮遍历完之后将count即分钟数自增1
+        if(addPoint)count++;
+    }
+    return count;
+}
+
+int orangesRotting(vector<vector<int>>& grid) {
+    int m=grid.size();
+    int n=grid[0].size();
+    vector <Location> badOrange;
+    //防止没有橘子的情况
+    int ans=0;
+    //0:未被访问 1：被访问
+    vector <vector<bool>> isVisited(m,vector <bool>(n,false));
+    for(int i=0;i<m;++i){
+        for(int j=0;j<n;++j){
+            if(grid[i][j]==2){
+                Location l;
+                l.row=i,l.col=j;
+                badOrange.push_back(l);
+            }
+        }
+    }
+    ans=BFS(isVisited,grid,badOrange);
+    for(int i=0;i<m;++i){
+        for(int j=0;j<n;++j){
+            if(grid[i][j]==1&&!isVisited[i][j]){
+                return -1;
+            }
+        }
+    }
+    return ans;
+}
+};
 
 int main(){
 
